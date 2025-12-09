@@ -15,4 +15,5 @@ type User struct {
 	CreatesAt time.Time
 	UpdatedAt time.Time
 	Username  string
+	ApiKey    string
 }
