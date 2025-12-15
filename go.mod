@@ -1,4 +1,4 @@
-module github.com/murtazapatel89100/RSS-Aggregartor
+module github.com/murtazapatel89100/FluxFeed
 
 go 1.22
 

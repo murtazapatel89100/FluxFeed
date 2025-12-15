@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/murtazapatel89100/RSS-Aggregartor/internal/database"
+	"github.com/murtazapatel89100/FluxFeed/internal/database"
 )
 
 func parseRSSDate(dateStr string) time.Time {

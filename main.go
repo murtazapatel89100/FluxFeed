@@ -11,9 +11,9 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
-	"github.com/murtazapatel89100/RSS-Aggregartor/internal/database"
-	"github.com/murtazapatel89100/RSS-Aggregartor/internal/handler"
-	"github.com/murtazapatel89100/RSS-Aggregartor/rss"
+	"github.com/murtazapatel89100/FluxFeed/internal/database"
+	"github.com/murtazapatel89100/FluxFeed/internal/handler"
+	"github.com/murtazapatel89100/FluxFeed/rss"
 
 	_ "github.com/lib/pq"
 )
