@@ -12,6 +12,7 @@ A high-performance, concurrent RSS feed aggregator and reader built with Go. Flu
 - **Pagination Support**: Retrieve posts with configurable limit and offset
 - **Error Handling**: Robust error handling with comprehensive logging
 - **Database Persistence**: PostgreSQL database for reliable data storage
+- **Graceful Shutdown**: Clean termination with signal handling (SIGINT/SIGTERM) and context propagation
 
 ## Tech Stack
 
@@ -359,8 +360,33 @@ The RSS scraper runs in the background with the following configuration:
 
 - **Concurrency**: 10 goroutines (configurable in `main.go`)
 - **Interval**: 60 seconds between scraping runs
-- **Startup Delay**: 10 seconds (allows time for database connections)
 - **Behavior**: Fetches feeds ordered by `last_fetched_at` (null feeds first)
+
+## Graceful Shutdown
+
+FluxFeed supports graceful shutdown to ensure clean termination:
+
+### Signal Handling
+- **SIGINT** (Ctrl+C): Initiates graceful shutdown
+- **SIGTERM**: Initiates graceful shutdown (useful for container orchestration)
+
+### Shutdown Sequence
+1. Signal received → shutdown initiated
+2. Context cancellation propagates to all goroutines
+3. Background scraper stops processing new feeds
+4. HTTP server stops accepting new connections
+5. In-flight requests have 30 seconds to complete
+6. Database connection is closed
+7. Application exits cleanly
+
+### Shutdown Logging
+```
+Shutdown signal received, gracefully shutting down...
+Scraper shutting down...
+Server shutdown completed
+Database connection closed
+Graceful shutdown completed
+```
 
 ## Architecture
 
@@ -382,6 +408,7 @@ The RSS scraper runs in the background with the following configuration:
    - Extract posts
    - Store in database (skips duplicates via unique constraint)
    - Update `last_fetched_at` timestamp
+4. Respects context cancellation for graceful shutdown
 
 ### Post Aggregation
 
@@ -417,19 +444,6 @@ go fmt ./...
 ```bash
 go vet ./...
 ```
-
-## Future Enhancements
-
-- [ ] Search/filter posts by title or content
-- [ ] User preferences (sorting, notification settings)
-- [ ] Feed categorization/tagging
-- [ ] Full-text search on post content
-- [ ] WebSocket support for real-time updates
-- [ ] User authentication (OAuth2)
-- [ ] Rate limiting
-- [ ] Caching layer (Redis)
-- [ ] Feed health monitoring
-- [ ] User feed recommendations
 
 ## Contributing
 

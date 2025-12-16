@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -30,17 +33,21 @@ func main() {
 		log.Fatal("No DB URL found in the env")
 	}
 
-	conection, err := sql.Open("postgres", dbURL)
+	connection, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatal("Failed to connect to the database:", err)
 	}
+	defer connection.Close()
 
-	config := handler.ApiConfig{DB: database.New(conection)}
+	config := handler.ApiConfig{DB: database.New(connection)}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	go func() {
 		time.Sleep(10 * time.Second)
 		log.Println("Starting RSS feed scraper...")
-		rss.ScrapeFeeds(config.DB, 10, 60*time.Second)
+		rss.ScrapeFeeds(ctx, config.DB, 10, 60*time.Second)
 	}()
 
 	router := chi.NewRouter()
@@ -69,15 +76,36 @@ func main() {
 
 	router.Mount("/v1", v1router)
 
-	fmt.Printf("Server is atrting on port %v", portString)
 	server := &http.Server{
 		Handler: router,
 		Addr:    ":" + portString,
 	}
 
-	err = server.ListenAndServe()
-	if err != nil {
-		log.Fatal(err)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		fmt.Printf("Server is starting on port %v\n", portString)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Server error: %v", err)
+		}
+	}()
+
+	<-quit
+	log.Println("\nShutdown signal received, gracefully shutting down...")
+
+	cancel()
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer shutdownCancel()
+
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		log.Printf("Server forced to shutdown: %v", err)
 	}
 
+	if err := connection.Close(); err != nil {
+		log.Printf("Error closing database connection: %v", err)
+	}
+
+	log.Println("Server exited gracefully")
 }
