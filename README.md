@@ -95,6 +95,10 @@ The server will start on `http://localhost:8080` and automatically:
 - Start the RSS feed scraper (after 10 seconds)
 - Listen for incoming HTTP requests
 
+#### Platform-Specific Scripts
+
+The scripts in the `scripts/` folder are designed for **Linux only**. For OS-specific binaries and cross-platform CLI utilities, check out the [go-utils](https://github.com/murtazapatel89100/go-utils) repository - a comprehensive Go CLI suite with build scripts for multiple operating systems.
+
 ## API Endpoints
 
 ### Public Endpoints
