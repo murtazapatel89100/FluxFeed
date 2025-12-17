@@ -45,10 +45,28 @@ A high-performance, concurrent RSS feed aggregator and reader built with Go. Flu
 
 ## Installation & Setup
 
+### Quick Start with Pre-built Binary
+
+The easiest way to get started is downloading a pre-built binary from [Releases](https://github.com/murtazapatel89100/FluxFeed/releases):
+
+```bash
+# Download for your platform (Linux, macOS, or Windows)
+./fluxfeed-linux --runtime docker    # or --runtime podman
+```
+
+Available binaries:
+- `fluxfeed-linux` - Linux x64
+- `fluxfeed-macos-intel` - macOS Intel
+- `fluxfeed-macos-apple` - macOS Apple Silicon (M1/M2/M3)
+- `fluxfeed-windows.exe` - Windows x64
+
+For complete automated setup experience across all platforms, download `setup-env` from [go-utils](https://github.com/murtazapatel89100/go-utils).
+
 ### Prerequisites
 
 - Go 1.22 or higher
 - PostgreSQL 12+
+- Docker or Podman (for containerized setup)
 - Goose (for database migrations)
 - sqlc (for code generation)
 
@@ -80,24 +98,34 @@ cd ../..
 sqlc generate
 ```
 
-### Building & Running
+### Build from Source
 
 ```bash
 # Build the application
-go build -o bin/fluxfeed
+go build -o bin/fluxfeed ./cmd/server
 
 # Run the application
 ./bin/fluxfeed
 ```
 
+### Docker Setup
+
+Use Docker or Podman with the provided configuration:
+
+```bash
+# Using Docker
+docker-compose up
+
+# Using Podman
+podman-compose up
+```
+
 The server will start on `http://localhost:8080` and automatically:
 - Connect to the PostgreSQL database
-- Start the RSS feed scraper (after 10 seconds)
+- Start the RSS feed scraper
 - Listen for incoming HTTP requests
 
-#### Platform-Specific Scripts
-
-The scripts in the `scripts/` folder are designed for **Linux only**. For OS-specific binaries and cross-platform CLI utilities, check out the [go-utils](https://github.com/murtazapatel89100/go-utils) repository - a comprehensive Go CLI suite with build scripts for multiple operating systems.
+See [scripts/README.md](scripts/README.md) for more setup options and details.
 
 ## API Endpoints
 
