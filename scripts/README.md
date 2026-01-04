@@ -2,6 +2,13 @@
 
 This directory contains helper scripts for setting up and managing the FluxFeed development environment.
 
+## Important: Binary Downloads
+
+**No binaries are included in this repository.** All required binaries must be downloaded separately from the links provided below:
+
+1. **setup-env** - Download from [go-utils](https://github.com/murtazapatel89100/go-utils)
+2. **fluxfeed** - Download from [FluxFeed Releases](https://github.com/murtazapatel89100/FluxFeed/releases)
+
 ## Quick Start Options
 
 ### Option 1: Automated DX Experience (Recommended)
@@ -57,6 +64,8 @@ podman-compose up
 
 ## Platform Considerations
 
-These shell scripts are designed for **Linux** environments. For cross-platform support and advanced automation, use:
-- The `fluxfeed` binary from releases
-- The `setup-env` utility from [go-utils](https://github.com/murtazapatel89100/go-utils)
+These shell scripts are designed for **Linux** environments only. 
+
+For cross-platform support and advanced automation, download the pre-built binaries:
+- **setup-env** binary from [go-utils](https://github.com/murtazapatel89100/go-utils) - For automated environment setup
+- **fluxfeed** binary from [FluxFeed Releases](https://github.com/murtazapatel89100/FluxFeed/releases) - For complete automation
