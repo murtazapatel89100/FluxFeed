@@ -21,6 +21,7 @@ FROM gcr.io/distroless/base-debian12
 WORKDIR /app
 
 COPY --from=builder /app/rssagg /app/rssagg
+COPY --from=builder /app/static /app/static
 
 EXPOSE 8000
 

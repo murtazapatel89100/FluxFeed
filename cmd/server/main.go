@@ -21,6 +21,10 @@ import (
 	_ "github.com/lib/pq"
 )
 
+func serveStatic(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "static/index.html")
+}
+
 func main() {
 	godotenv.Load(".env")
 	portString := os.Getenv("PORT")
@@ -64,6 +68,10 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300,
 	})))
+
+	router.Get("/", serveStatic)
+
+	router.Handle("/static/*", http.StripPrefix("/static", http.FileServer(http.Dir("static"))))
 
 	v1router := chi.NewRouter()
 	v1router.Get("/health", handler.HandlerReadiness)
