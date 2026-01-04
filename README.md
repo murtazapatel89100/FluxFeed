@@ -19,7 +19,7 @@ A high-performance, concurrent RSS feed aggregator and reader built with Go. Flu
 - **Language**: Go 1.22+
 - **Router**: Chi (chi-router)
 - **Database**: PostgreSQL with sqlc for type-safe queries
-- **Migrations**: Goose
+- **Migrations**: Automatic migration system (runs on app startup)
 - **Authentication**: API Key (Authorization header)
 - **CORS**: Enabled for cross-origin requests
 
@@ -67,36 +67,23 @@ For complete automated setup experience across all platforms, download `setup-en
 - Go 1.22 or higher
 - PostgreSQL 12+
 - Docker or Podman (for containerized setup)
-- Goose (for database migrations)
-- sqlc (for code generation)
 
 ### Database Setup
 
-1. Create a PostgreSQL database and user:
-```sql
-CREATE DATABASE rss_aggregator_db;
-CREATE USER rss_user WITH PASSWORD 'your_password';
-ALTER ROLE rss_user WITH SUPERUSER;
-GRANT ALL PRIVILEGES ON DATABASE rss_aggregator_db TO rss_user;
+The application automatically handles database migrations on startup. Simply:
+
+1. Create a `.env` file with database credentials:
+```bash
+cp env.template .env
+# Edit .env with your database credentials
 ```
 
-2. Set environment variables:
-```bash
-export DATABASE_URL="postgres://rss_user:your_password@localhost:5432/rss_aggregator_db?sslmode=disable"
-export PORT=8080
-```
-
-3. Run migrations:
-```bash
-cd sql/schema
-goose postgres $DATABASE_URL up
-cd ../..
-```
-
-4. Generate code from SQL queries:
-```bash
-sqlc generate
-```
+2. The migrations will run automatically when the app starts, creating all necessary tables:
+   - `users` table for user accounts and API keys
+   - `feeds` table for RSS feed subscriptions
+   - `feeds_follow` table for user feed subscriptions
+   - `posts` table for aggregated articles
+   - `schema_migrations` table to track applied migrations
 
 ### Build from Source
 
@@ -113,17 +100,23 @@ go build -o bin/fluxfeed ./cmd/server
 Use Docker or Podman with the provided configuration:
 
 ```bash
-# Using Docker
-docker-compose up
+# Copy environment template
+cp env.template .env
 
-# Using Podman
-podman-compose up
+# Using Docker Compose
+docker-compose up --build
+
+# Using Podman Compose
+podman-compose up --build
 ```
 
-The server will start on `http://localhost:8080` and automatically:
+The server will start on `http://localhost:8000` and automatically:
+- Run database migrations to create all necessary tables
 - Connect to the PostgreSQL database
-- Start the RSS feed scraper
+- Start the RSS feed scraper in the background
 - Listen for incoming HTTP requests
+
+**Note**: The application waits for PostgreSQL to be healthy before starting, ensuring migrations run against a ready database.
 
 See [scripts/README.md](scripts/README.md) for more setup options and details.
 
@@ -328,14 +321,16 @@ curl -X GET http://localhost:8080/v1/feeds-follow/user \
 
 ## Database Schema
 
+**Note**: All tables are automatically created by the migration system when the application starts.
+
 ### Users Table
 ```sql
 CREATE TABLE users (
     id UUID PRIMARY KEY,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     username TEXT NOT NULL UNIQUE,
-    api_key TEXT NOT NULL UNIQUE
+    api_key VARCHAR(255) UNIQUE NOT NULL
 );
 ```
 
@@ -343,11 +338,11 @@ CREATE TABLE users (
 ```sql
 CREATE TABLE feeds (
     id UUID PRIMARY KEY,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     name TEXT NOT NULL UNIQUE,
     url TEXT NOT NULL UNIQUE,
-    user_id UUID NOT NULL REFERENCES users(id),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     last_fetched_at TIMESTAMP
 );
 ```
@@ -356,10 +351,10 @@ CREATE TABLE feeds (
 ```sql
 CREATE TABLE feeds_follow (
     id UUID PRIMARY KEY,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
-    user_id UUID NOT NULL REFERENCES users(id),
-    feed_id UUID NOT NULL REFERENCES feeds(id),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    feed_id UUID NOT NULL REFERENCES feeds(id) ON DELETE CASCADE,
     UNIQUE(user_id, feed_id)
 );
 ```
@@ -368,31 +363,55 @@ CREATE TABLE feeds_follow (
 ```sql
 CREATE TABLE posts (
     id UUID PRIMARY KEY,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     title TEXT NOT NULL UNIQUE,
     description TEXT,
     published_at TIMESTAMP NOT NULL,
     url TEXT NOT NULL UNIQUE,
-    feed_id UUID NOT NULL REFERENCES feeds(id)
+    feed_id UUID NOT NULL REFERENCES feeds(id) ON DELETE CASCADE
+);
+```
+
+### Schema Migrations Table
+```sql
+CREATE TABLE schema_migrations (
+    version INT PRIMARY KEY,
+    applied_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 ```
 
 ## Configuration
 
-Environment variables:
+Environment variables (see `env.template` for reference):
 
+### Application Settings
+- `PORT`: HTTP server port (default: 8000)
+
+### Database Connection
 - `DATABASE_URL`: PostgreSQL connection string (required)
   - Format: `postgres://user:password@host:port/database?sslmode=disable`
-- `PORT`: HTTP server port (default: 8080)
+  - Example: `postgres://fluxfeed_user:fluxfeed_password@db:5432/fluxfeed_dev?sslmode=disable`
+
+### Docker Compose Settings
+- `POSTGRES_USER`: PostgreSQL username for the database container
+- `POSTGRES_PASSWORD`: PostgreSQL password for the database container
+- `POSTGRES_DB`: PostgreSQL database name
+- `DB_HOST`: Database hostname (use `db` for Docker Compose)
+- `DB_PORT`: Database port (default: 5432)
+- `DB_NAME`: Database name
+- `DB_USER`: Database user
+- `DB_PASSWORD`: Database password
 
 ## Background Scraper
 
 The RSS scraper runs in the background with the following configuration:
 
-- **Concurrency**: 10 goroutines (configurable in `main.go`)
+- **Start Delay**: 10 seconds (allows app to fully initialize before scraping)
+- **Concurrency**: 10 goroutines (configurable in `cmd/server/main.go`)
 - **Interval**: 60 seconds between scraping runs
 - **Behavior**: Fetches feeds ordered by `last_fetched_at` (null feeds first)
+- **Shutdown**: Gracefully stops on signal reception (SIGINT/SIGTERM)
 
 ## Graceful Shutdown
 
@@ -462,6 +481,16 @@ All errors return JSON with an `error` field.
 
 ## Development
 
+### Building from Source
+```bash
+# Build the binary
+go build -o bin/fluxfeed ./cmd/server
+
+# Run with environment file
+cp env.template .env
+./bin/fluxfeed
+```
+
 ### Running Tests
 ```bash
 go test ./...
@@ -475,6 +504,12 @@ go fmt ./...
 ### Linting
 ```bash
 go vet ./...
+```
+
+### Database Migrations
+Migrations are automatically applied on application startup. To see migration status, check the `schema_migrations` table:
+```sql
+SELECT * FROM schema_migrations ORDER BY version;
 ```
 
 ## Contributing

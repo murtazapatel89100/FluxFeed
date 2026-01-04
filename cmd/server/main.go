@@ -39,6 +39,10 @@ func main() {
 	}
 	defer connection.Close()
 
+	if err := database.RunMigrations(connection); err != nil {
+		log.Fatal("Failed to run database migrations:", err)
+	}
+
 	config := handler.ApiConfig{DB: database.New(connection)}
 
 	ctx, cancel := context.WithCancel(context.Background())

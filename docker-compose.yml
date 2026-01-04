@@ -1,23 +1,29 @@
 services:
   api:
-    image: fluxfeed:latest
+    image: docker.io/murtazapatel89100/fluxfeed:latest
     ports:
-      - "${PORT}:${PORT}"
+      - "8000:8000"
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:15
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: fluxfeed_user
+      POSTGRES_PASSWORD: fluxfeed_password
+      POSTGRES_DB: fluxfeed_dev
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fluxfeed_user -d fluxfeed_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   db_data:
