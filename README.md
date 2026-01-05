@@ -122,12 +122,43 @@ See [scripts/README.md](scripts/README.md) for more setup options and details.
 
 ## API Endpoints
 
-### Public Endpoints
+### Authentication
+
+All endpoints (except `/health`) require API token authentication via the `Authorization` header:
+
+```
+Authorization: ApiKey YOUR_API_TOKEN
+```
+
+The `API_TOKEN` is configured in your `.env` file:
+```env
+API_TOKEN=your_secure_token_here
+```
+
+### Public Endpoints (No Authentication Required)
+
+#### Health Check
+```
+GET /v1/health
+
+Response (200):
+{
+  "status": "ok"
+}
+```
+
+### Protected Endpoints (Require Authorization Header)
+
+All other endpoints require:
+```
+Authorization: ApiKey YOUR_API_TOKEN
+```
 
 #### Create User
 ```
 POST /v1/users/create
 Content-Type: application/json
+Authorization: ApiKey YOUR_API_TOKEN
 
 {
   "name": "John Doe"
@@ -146,6 +177,7 @@ Response (201):
 #### Get All Feeds
 ```
 GET /v1/feeds/fetch
+Authorization: ApiKey YOUR_API_TOKEN
 
 Response (200):
 [
@@ -161,16 +193,10 @@ Response (200):
 ]
 ```
 
-### Protected Endpoints (Require Authorization Header)
-
-All protected endpoints require:
-```
-Authorization: ApiKey your_api_key_here
-```
-
 #### Get Current User
 ```
 GET /v1/users/fetch
+Authorization: ApiKey YOUR_API_TOKEN
 
 Response (200):
 {
@@ -186,6 +212,7 @@ Response (200):
 ```
 POST /v1/feeds/create
 Content-Type: application/json
+Authorization: ApiKey YOUR_API_TOKEN
 
 {
   "name": "Tech News",
@@ -208,6 +235,7 @@ Response (201):
 ```
 POST /v1/feeds-follow/create
 Content-Type: application/json
+Authorization: ApiKey YOUR_API_TOKEN
 
 {
   "feed_id": "uuid"
@@ -226,6 +254,7 @@ Response (201):
 #### Get User's Feed Follows
 ```
 GET /v1/feeds-follow/fetch
+Authorization: ApiKey YOUR_API_TOKEN
 
 Response (200):
 [
@@ -242,6 +271,7 @@ Response (200):
 #### Get User's Feed Posts
 ```
 GET /v1/feeds-follow/user
+Authorization: ApiKey YOUR_API_TOKEN
 
 Response (200):
 [
@@ -261,6 +291,7 @@ Response (200):
 #### Unfollow Feed
 ```
 DELETE /v1/feeds-follow/delete/{feedFollowID}
+Authorization: ApiKey YOUR_API_TOKEN
 
 Response (200):
 {
@@ -268,21 +299,18 @@ Response (200):
 }
 ```
 
-#### Health Check
-```
-GET /v1/health
-
-Response (200):
-{
-  "status": "ok"
-}
-```
-
 ## Usage Example
+
+### Prerequisites
+Make sure you have the `API_TOKEN` from your `.env` file:
+```env
+API_TOKEN=your_secure_token_here
+```
 
 ### 1. Create a User
 ```bash
-curl -X POST http://localhost:8080/v1/users/create \
+curl -X POST http://localhost:8000/v1/users/create \
+  -H "Authorization: ApiKey YOUR_API_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name":"John Doe"}'
 ```
@@ -291,8 +319,8 @@ Save the returned `api_key`.
 
 ### 2. Create a Feed
 ```bash
-curl -X POST http://localhost:8080/v1/feeds/create \
-  -H "Authorization: ApiKey YOUR_API_KEY" \
+curl -X POST http://localhost:8000/v1/feeds/create \
+  -H "Authorization: ApiKey YOUR_API_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "name":"Tech Blog",
@@ -302,10 +330,11 @@ curl -X POST http://localhost:8080/v1/feeds/create \
 
 Save the returned `feed_id`.
 
+
 ### 3. Follow a Feed
 ```bash
-curl -X POST http://localhost:8080/v1/feeds-follow/create \
-  -H "Authorization: ApiKey YOUR_API_KEY" \
+curl -X POST http://localhost:8000/v1/feeds-follow/create \
+  -H "Authorization: ApiKey YOUR_API_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"feed_id":"FEED_ID"}'
 ```
@@ -315,8 +344,8 @@ The background scraper runs every 60 seconds. Wait for it to fetch posts.
 
 ### 5. Retrieve Your Posts
 ```bash
-curl -X GET http://localhost:8080/v1/feeds-follow/user \
-  -H "Authorization: ApiKey YOUR_API_KEY"
+curl -X GET http://localhost:8000/v1/feeds-follow/user \
+  -H "Authorization: ApiKey YOUR_API_TOKEN"
 ```
 
 ## Database Schema

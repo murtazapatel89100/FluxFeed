@@ -21,13 +21,12 @@ func (config ApiConfig) MiddlewareAuth(next http.Handler) http.Handler {
 			return
 		}
 
-		user, err := config.DB.GetUserByApiKey(r.Context(), apikey)
-		if err != nil {
-			RespondWithError(w, 403, "Invalid API key")
+		if apikey != config.APIToken {
+			RespondWithError(w, 403, "Invalid API token")
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), userContextKey, user)
+		ctx := context.WithValue(r.Context(), userContextKey, apikey)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -35,4 +34,9 @@ func (config ApiConfig) MiddlewareAuth(next http.Handler) http.Handler {
 func GetUserFromContext(r *http.Request) (database.User, bool) {
 	user, ok := r.Context().Value(userContextKey).(database.User)
 	return user, ok
+}
+
+func GetTokenFromContext(r *http.Request) (string, bool) {
+	token, ok := r.Context().Value(userContextKey).(string)
+	return token, ok
 }

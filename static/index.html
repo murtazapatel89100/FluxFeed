@@ -568,8 +568,18 @@
         <div class="endpoints-section">
           <div class="endpoint-header">
             <h2>API Reference</h2>
-            <span class="api-version">v1</span>
+            <span class="api-version">v1 - API Token Required</span>
           </div>
+
+          <p style="margin-bottom: 25px; color: #6b7280; font-size: 0.95em">
+            <strong>Authentication:</strong> All endpoints (except /health)
+            require an
+            <code
+              style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px"
+              >Authorization: ApiKey YOUR_API_TOKEN</code
+            >
+            header.
+          </p>
 
           <div class="filter-controls">
             <button
@@ -674,13 +684,13 @@
           method: "post",
           path: "/v1/users/create",
           description: "Register a new user account",
-          auth: false,
+          auth: true,
         },
         {
-          method: "post",
+          method: "get",
           path: "/v1/feeds/fetch",
           description: "Retrieve all available RSS feeds",
-          auth: false,
+          auth: true,
         },
         {
           method: "get",

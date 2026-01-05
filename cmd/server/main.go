@@ -26,15 +26,24 @@ func serveStatic(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	godotenv.Load(".env")
-	portString := os.Getenv("PORT")
+	env, err := godotenv.Read(".env")
+	if err != nil {
+		log.Printf("Warning: Could not load .env file: %v", err)
+	}
+
+	portString := env["PORT"]
 	if portString == "" {
 		log.Fatal("PORT is not found in the env")
 	}
 
-	dbURL := os.Getenv("DATABASE_URL")
+	dbURL := env["DATABASE_URL"]
 	if dbURL == "" {
 		log.Fatal("No DB URL found in the env")
+	}
+
+	apiToken := env["API_TOKEN"]
+	if apiToken == "" {
+		log.Fatal("API_TOKEN is not found in the env")
 	}
 
 	connection, err := sql.Open("postgres", dbURL)
@@ -47,7 +56,10 @@ func main() {
 		log.Fatal("Failed to run database migrations:", err)
 	}
 
-	config := handler.ApiConfig{DB: database.New(connection)}
+	config := handler.ApiConfig{
+		DB:       database.New(connection),
+		APIToken: apiToken,
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -74,11 +86,12 @@ func main() {
 	router.Handle("/static/*", http.StripPrefix("/static", http.FileServer(http.Dir("static"))))
 
 	v1router := chi.NewRouter()
+
 	v1router.Get("/health", handler.HandlerReadiness)
 	v1router.Get("/error", handler.HandlerError)
-	v1router.Post("/users/create", config.HandlerCreateUser)
-	v1router.Post("/feeds/fetch", config.HandlerGetFeeds)
 
+	v1router.With(config.MiddlewareAuth).Post("/users/create", config.HandlerCreateUser)
+	v1router.With(config.MiddlewareAuth).Post("/feeds/fetch", config.HandlerGetFeeds)
 	v1router.With(config.MiddlewareAuth).Get("/users/fetch", config.HandlerGetUser)
 	v1router.With(config.MiddlewareAuth).Post("/feeds/create", config.HandlerCreateFeed)
 	v1router.With(config.MiddlewareAuth).Post("/feeds-follow/create", config.HandlerCreateFeedFollow)
