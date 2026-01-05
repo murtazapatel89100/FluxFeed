@@ -72,11 +72,16 @@ For complete automated setup experience across all platforms, download `setup-en
 
 The application automatically handles database migrations on startup. Simply:
 
-1. Create a `.env` file with database credentials:
+1. Create a `.env` file with database credentials and API token:
 ```bash
 cp env.template .env
-# Edit .env with your database credentials
+# Edit .env with your database credentials and set a secure API_TOKEN
 ```
+
+The `.env` file must include:
+- `PORT`: Server port (default: 8000)
+- `DATABASE_URL`: PostgreSQL connection string
+- `API_TOKEN`: Secure token for API authentication (required for all requests)
 
 2. The migrations will run automatically when the app starts, creating all necessary tables:
    - `users` table for user accounts and API keys
@@ -84,6 +89,17 @@ cp env.template .env
    - `feeds_follow` table for user feed subscriptions
    - `posts` table for aggregated articles
    - `schema_migrations` table to track applied migrations
+
+**Important**: Generate a secure `API_TOKEN` using a tool like:
+```bash
+# Generate a secure random token
+openssl rand -hex 64
+```
+
+Then add it to your `.env` file:
+```env
+API_TOKEN=your_generated_secure_token_here
+```
 
 ### Build from Source
 
@@ -472,11 +488,15 @@ Graceful shutdown completed
 
 ### Authentication Flow
 
-1. User creates account → receives `api_key`
-2. User includes `api_key` in `Authorization: ApiKey <key>` header
-3. Middleware validates key against database
-4. User object stored in request context
-5. Handler retrieves user from context and processes request
+1. Application loads `.env` file at startup via `godotenv`
+2. `API_TOKEN` is validated and stored in `ApiConfig`
+3. Client sends request with `Authorization: ApiKey YOUR_API_TOKEN` header
+4. Middleware (`MiddlewareAuth`) extracts token from request header
+5. Token is validated against the stored `API_TOKEN`
+6. If valid, request proceeds and token is stored in request context
+7. Handlers can access token via `GetTokenFromContext(r)`
+
+**Security**: All endpoints except `/health` require valid `API_TOKEN`. Requests with missing or invalid tokens receive a 403 Forbidden response.
 
 ### Feed Scraping Flow
 
@@ -502,11 +522,20 @@ Results are ordered by `published_at` descending and paginated.
 ## Error Handling
 
 - **400**: Bad request (invalid JSON, missing fields)
-- **403**: Forbidden (invalid API key, authentication failed)
+- **403**: Forbidden (invalid API token, authentication failed)
 - **404**: Not found (endpoint doesn't exist)
 - **500**: Internal server error (database error, scraper error)
 
 All errors return JSON with an `error` field.
+
+### Common Authentication Errors
+
+| Status | Message | Cause |
+|--------|---------|-------|
+| 403 | `Authentication error: no Authorization token found` | Missing `Authorization` header |
+| 403 | `Authentication error: invalid Token Format` | Header format not `ApiKey <token>` |
+| 403 | `Authentication error: malformed Token Format` | Header missing space or `ApiKey` prefix |
+| 403 | `Invalid API token` | Token doesn't match `API_TOKEN` from `.env` |
 
 ## Development
 

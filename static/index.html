@@ -562,6 +562,35 @@
       </div>
     </div>
 
+    <!-- Authentication Section -->
+    <div class="section" style="background: white">
+      <div class="container">
+        <div class="section-header">
+          <h2>API Authentication</h2>
+          <p>Secure token-based authentication for all API endpoints</p>
+        </div>
+        <div style="max-width: 900px; margin: 0 auto;">
+          <div style="background: #f0f9ff; border-left: 4px solid #2563eb; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+            <h3 style="color: #1e40af; margin-top: 0;">How It Works</h3>
+            <ol style="color: #1e40af; line-height: 1.8;">
+              <li>Generate or obtain your <strong>API_TOKEN</strong> from your server administrator</li>
+              <li>Include it in every API request using the <code style="background: #dbeafe; padding: 2px 6px; border-radius: 3px;">Authorization</code> header</li>
+              <li>Format: <code style="background: #dbeafe; padding: 2px 6px; border-radius: 3px;">Authorization: ApiKey YOUR_API_TOKEN</code></li>
+              <li>The server validates your token and processes the request</li>
+            </ol>
+          </div>
+
+          <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 20px; border-radius: 8px;">
+            <h3 style="color: #7f1d1d; margin-top: 0;">Example Request</h3>
+            <pre style="background: #fff5f5; padding: 15px; border-radius: 6px; overflow-x: auto; color: #7f1d1d;"><code>curl -X POST http://localhost:8000/v1/users/create \
+  -H "Authorization: ApiKey your_api_token_here" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John Doe"}'</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Endpoints Section -->
     <div class="section" id="endpoints">
       <div class="container">
@@ -571,15 +600,14 @@
             <span class="api-version">v1 - API Token Required</span>
           </div>
 
-          <p style="margin-bottom: 25px; color: #6b7280; font-size: 0.95em">
-            <strong>Authentication:</strong> All endpoints (except /health)
-            require an
-            <code
-              style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px"
-              >Authorization: ApiKey YOUR_API_TOKEN</code
-            >
-            header.
-          </p>
+          <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 6px; margin-bottom: 25px;">
+            <p style="margin: 0; color: #92400e; font-size: 0.95em;">
+              <strong>🔑 Authentication Required:</strong> All endpoints (except <code style="background: #fff8e1; padding: 2px 6px; border-radius: 3px;">/health</code>) require an <code style="background: #fff8e1; padding: 2px 6px; border-radius: 3px;">Authorization</code> header with your API token.
+            </p>
+            <p style="margin: 10px 0 0 0; color: #92400e; font-size: 0.9em;">
+              Format: <code style="background: #fff8e1; padding: 4px 8px; border-radius: 3px; display: block; margin-top: 8px; font-family: monospace;">Authorization: ApiKey YOUR_API_TOKEN</code>
+            </p>
+          </div>
 
           <div class="filter-controls">
             <button
