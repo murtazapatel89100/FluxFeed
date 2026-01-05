@@ -70,7 +70,7 @@ For complete automated setup experience across all platforms, download `setup-en
 
 ### Database Setup
 
-The application automatically handles database migrations on startup. Simply:
+The application automatically handles database migrations based on environment mode:
 
 1. Create a `.env` file with database credentials and API token:
 ```bash
@@ -82,13 +82,16 @@ The `.env` file must include:
 - `PORT`: Server port (default: 8000)
 - `DATABASE_URL`: PostgreSQL connection string
 - `API_TOKEN`: Secure token for API authentication (required for all requests)
+- `DEVELOPMENT_MODE`: Set to `true` for development (skips migrations), `false` for production (runs migrations)
 
-2. The migrations will run automatically when the app starts, creating all necessary tables:
+2. Migrations behavior:
+   - **Production** (`DEVELOPMENT_MODE=false`): Migrations run automatically when the app starts, creating all necessary tables:
    - `users` table for user accounts and API keys
    - `feeds` table for RSS feed subscriptions
    - `feeds_follow` table for user feed subscriptions
    - `posts` table for aggregated articles
    - `schema_migrations` table to track applied migrations
+   - **Development** (`DEVELOPMENT_MODE=true`): Migrations are skipped. Manually run migrations using the database management tools if needed.
 
 **Important**: Generate a secure `API_TOKEN` using a tool like:
 ```bash
@@ -110,6 +113,27 @@ go build -o bin/fluxfeed ./cmd/server
 # Run the application
 ./bin/fluxfeed
 ```
+
+### Running Locally with System PostgreSQL
+
+If you have PostgreSQL already running on your system:
+
+```bash
+# Build the application
+go build -o bin/fluxfeed ./cmd/server
+
+# Create .env with your local PostgreSQL credentials
+cp env.template .env
+
+# Edit .env with your actual database details:
+# DATABASE_URL=postgres://user:password@localhost:5433/your_db?sslmode=disable
+# DEVELOPMENT_MODE=true
+
+# Run the application
+./bin/fluxfeed
+```
+
+**Note**: The `DATABASE_URL` connection string must match your PostgreSQL server's actual port and credentials.
 
 ### Docker Setup
 
@@ -212,7 +236,11 @@ Response (200):
 #### Get Current User
 ```
 GET /v1/users/fetch
-Authorization: ApiKey YOUR_API_TOKEN
+Content-Type: application/json
+
+{
+  "user_api_key": "your_api_key_here"
+}
 
 Response (200):
 {

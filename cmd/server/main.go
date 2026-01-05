@@ -52,8 +52,17 @@ func main() {
 	}
 	defer connection.Close()
 
-	if err := database.RunMigrations(connection); err != nil {
-		log.Fatal("Failed to run database migrations:", err)
+	developmentMode := env["DEVELOPMENT_MODE"]
+	if developmentMode == "" {
+		log.Fatal("Please add a development mode")
+	}
+
+	if developmentMode == "false" {
+		if err := database.RunMigrations(connection); err != nil {
+			log.Fatal("Failed to run database migrations:", err)
+		}
+	} else {
+		log.Println("Skipping migrations in development mode please run manual migrations")
 	}
 
 	config := handler.ApiConfig{

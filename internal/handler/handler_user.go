@@ -37,9 +37,22 @@ func (config ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Request
 }
 
 func (config ApiConfig) HandlerGetUser(w http.ResponseWriter, r *http.Request) {
-	user, ok := GetUserFromContext(r)
-	if !ok {
-		RespondWithError(w, 403, "User not found in context")
+	type parameters struct {
+		ApiKey string `json:"user_api_key"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	params := parameters{}
+
+	err := decoder.Decode(&params)
+	if err != nil {
+		RespondWithError(w, 400, fmt.Sprintf("Failed to decode request body: %v", err))
+		return
+	}
+
+	user, err := config.DB.GetUserByApiKey(r.Context(), params.ApiKey)
+	if err != nil {
+		RespondWithError(w, 404, fmt.Sprintf("Failed to get user: %v", err))
 		return
 	}
 
