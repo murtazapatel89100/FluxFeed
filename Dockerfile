@@ -22,6 +22,7 @@ WORKDIR /app
 
 COPY --from=builder /app/rssagg /app/rssagg
 COPY --from=builder /app/static /app/static
+COPY .env /app/.env
 
 EXPOSE 8000
 
