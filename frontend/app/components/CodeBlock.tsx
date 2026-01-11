@@ -39,7 +39,7 @@ export function CodeBlock({
           )}
         </button>
       </div>
-      <pre className="px-4 py-3 overflow-x-auto">
+      <pre className="px-4 py-3 font-code overflow-x-auto">
         <code className="text-sm font-mono text-slate-100">{children}</code>
       </pre>
     </div>
