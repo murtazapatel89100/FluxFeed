@@ -7,7 +7,9 @@ const navLinks = [
   { href: "/getting-started", label: "Getting Started" },
   { href: "/api-reference", label: "API Reference" },
   { href: "/authentication", label: "Authentication" },
-  { href: "/database", label: "Database Schema" },
+  { href: "/database", label: "Database" },
+  { href: "/configuration", label: "Configuration" },
+  { href: "/architecture", label: "Architecture" },
 ];
 
 export function Navbar() {

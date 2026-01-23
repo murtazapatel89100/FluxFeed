@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/murtazapatel89100/FluxFeed/internal/auth"
-	"github.com/murtazapatel89100/FluxFeed/internal/database"
+	"github.com/murtazapatel89100/FluxFeed/backend/internal/auth"
+	"github.com/murtazapatel89100/FluxFeed/backend/internal/database"
 )
 
 type contextKey string

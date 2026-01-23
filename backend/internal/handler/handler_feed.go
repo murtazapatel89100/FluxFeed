@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
-	"github.com/murtazapatel89100/FluxFeed/internal/database"
+	"github.com/murtazapatel89100/FluxFeed/backend/internal/database"
 )
 
 func (config ApiConfig) HandlerCreateFeed(w http.ResponseWriter, r *http.Request) {

@@ -6,4 +6,6 @@ export default [
   route("api-reference", "routes/api-reference.tsx"),
   route("authentication", "routes/authentication.tsx"),
   route("database", "routes/database.tsx"),
+  route("configuration", "routes/configuration.tsx"),
+  route("architecture", "routes/architecture.tsx"),
 ] satisfies RouteConfig;

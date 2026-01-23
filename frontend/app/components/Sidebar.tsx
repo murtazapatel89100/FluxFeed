@@ -25,6 +25,13 @@ const sections: SidebarSection[] = [
     title: "Database",
     links: [{ href: "/database", label: "Schema" }],
   },
+  {
+    title: "Advanced",
+    links: [
+      { href: "/configuration", label: "Configuration" },
+      { href: "/architecture", label: "Architecture" },
+    ],
+  },
 ];
 
 export function Sidebar() {

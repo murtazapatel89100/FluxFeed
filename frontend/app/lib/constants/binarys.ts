@@ -1,18 +1,21 @@
-export const AvailableBinarys = [
+export const binarys = [
   {
     name: "fluxfeed-linux",
-    for: "Linux x64",
+    description: "Linux x64",
   },
   {
     name: "fluxfeed-macos-intel",
-    for: "macOS Intel",
+    description: "macOS Intel",
   },
   {
     name: "fluxfeed-macos-apple",
-    for: "macOS Apple Silicon (M1/M2/M3)",
+    description: "macOS Apple Silicon (M1/M2/M3)",
   },
   {
     name: "fluxfeed-windows.exe",
-    for: "Windows x64",
+    description: "Windows x64",
   },
 ];
+
+// Keep backward compatibility
+export const AvailableBinarys = binarys;
