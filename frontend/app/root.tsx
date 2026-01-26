@@ -11,15 +11,19 @@ import type { Route } from "./+types/root";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
+    rel: "preload",
+    href: "/fonts/Inter/Inter-VariableFont_opsz%2Cwght.ttf",
+    as: "font",
+    type: "font/ttf",
     crossOrigin: "anonymous",
   },
   {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+    rel: "preload",
+    href: "/fonts/JetBrains_Mono/JetBrainsMono-VariableFont_wght.ttf",
+    as: "font",
+    type: "font/ttf",
+    crossOrigin: "anonymous",
   },
 ];
 

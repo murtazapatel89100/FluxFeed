@@ -3,11 +3,11 @@ FROM golang:1.22-alpine AS builder
 
 WORKDIR /app
 
-COPY ../go.mod ../go.sum ./
+COPY go.mod go.sum ./
 
-COPY vendor ./vendor
+COPY backend/vendor ./vendor
 
-COPY . .
+COPY backend/ ./
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     GOFLAGS="-mod=vendor" \
@@ -21,7 +21,7 @@ WORKDIR /app
 
 COPY --from=builder /app/rssagg /app/rssagg
 COPY --from=builder /app/static /app/static
-COPY .env.prod /app/.env
+COPY backend/.env.prod /app/.env
 
 EXPOSE 8000
 
