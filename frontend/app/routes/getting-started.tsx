@@ -60,38 +60,6 @@ docker compose up -d`}
           </p>
         </section>
 
-        {/* Pre-built Binary */}
-        <section className="flex flex-col gap-y-3">
-          <h2 className="text-2xl font-bold">
-            Quick Start with Pre-built Binary
-          </h2>
-          <p>
-            Download a pre-built binary from the{" "}
-            <Link
-              to="https://github.com/murtazapatel89100/FluxFeed/releases"
-              target="_blank"
-              className="text-blue-600 underline hover:font-semibold"
-            >
-              Releases page
-            </Link>
-            :
-          </p>
-          <CodeBlock language="bash" title="Run pre-built binary">
-            {`# Download for your platform (Linux, macOS, or Windows)
-./fluxfeed-linux --runtime docker    # or --runtime podman`}
-          </CodeBlock>
-
-          <h3 className="text-xl font-semibold mt-2">Available Binaries</h3>
-          <ul className="list-disc list-inside space-y-1 ml-4">
-            {binarys.map((binary) => (
-              <li key={binary.name}>
-                <code className="bg-slate-500 px-1 rounded">{binary.name}</code>{" "}
-                - {binary.description}
-              </li>
-            ))}
-          </ul>
-        </section>
-
         {/* Environment Setup */}
         <section className="flex flex-col gap-y-3">
           <h2 className="text-2xl font-bold">Environment Setup</h2>
