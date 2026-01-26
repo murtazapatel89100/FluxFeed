@@ -1,87 +1,46 @@
-# Welcome to React Router!
+# FluxFeed - RSS Aggregator & Reader
 
-A modern, production-ready template for building full-stack React applications using React Router.
-
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+A high-performance, concurrent RSS feed aggregator and reader built with Go. FluxFeed efficiently scrapes multiple RSS feeds, stores articles in a PostgreSQL database, and provides a RESTful API for users to manage feeds and read aggregated content.
 
 ## Features
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+- **Multi-Feed Management**: Create and manage multiple RSS feed subscriptions
+- **Concurrent Feed Scraping**: Background worker processes with configurable concurrency that continuously fetch and update feeds
+- **User Authentication**: API key-based authentication for secure access
+- **Feed Following**: Allows users to follow or unfollow feeds to customize their reading experience
+- **Post Aggregation**: Fetches and stores posts from followed feeds with full-text content
+- **Pagination Support**: Retrieve posts with configurable limit and offset for efficient data loading
+- **Error Handling**: Robust error handling with comprehensive logging for reliability and debugging
+- **Database Persistence**: PostgreSQL database for reliable and consistent data storage
+- **Graceful Shutdown**: Clean termination with signal handling (SIGINT/SIGTERM) and context propagation
+
+## Technology Stack
+
+- **Language**: Go 1.22+ for building a fast, reliable, and concurrent backend
+- **Router**: Chi (chi-router) for lightweight and idiomatic HTTP routing
+- **Database**: PostgreSQL with sqlc for type-safe, compile-time checked SQL queries
+- **Migrations**: Automatic database migration system that runs on application startup
+- **Authentication**: API key-based authentication using the Authorization header
+- **CORS**: CORS enabled to allow secure cross-origin requests
+- **Docker**: Containerization platform for consistent deployment environments
+- **Nginx**: Web server and reverse proxy for handling HTTP requests
 
 ## Getting Started
 
-### Installation
-
-Install the dependencies:
+The easiest way to get started is by using Docker Compose to run both the frontend and backend:
 
 ```bash
-npm install
+git clone "https://github.com/murtazapatel89100/FluxFeed.git"
+cd FluxFeed
+docker compose up -d --build
 ```
 
-### Development
+This will start the FluxFeed server on `http://localhost:8000` and the documentation site on `http://localhost:3000`. It will also automatically run database migrations.
 
-Start the development server with HMR:
+For more detailed instructions on installation, configuration, API reference, and architecture, please refer to the official documentation:
 
-```bash
-npm run dev
-```
+[**FluxFeed Documentation**](http://localhost:3000)
 
-Your application will be available at `http://localhost:5173`.
+## License
 
-## Building for Production
-
-Create a production build:
-
-```bash
-npm run build
-```
-
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
-
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+This project is licensed under the MIT License.
