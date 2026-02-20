@@ -1,0 +1,20 @@
+version: 1
+applications:
+  - appRoot: frontend
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - corepack enable
+            - pnpm install --frozen-lockfile
+        build:
+          commands:
+            - pnpm run build
+      artifacts:
+        baseDirectory: build/client
+        files:
+          - "**/*"
+      cache:
+        paths:
+          - node_modules/**/*
+          - /root/.pnpm-store/**/*
